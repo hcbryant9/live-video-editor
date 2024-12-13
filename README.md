@@ -1,4 +1,4 @@
-# Video Frame Viewer
+# Live Video Editor
 
 A Python application using **Tkinter**, **OpenCV**, and **PIL** to display video frames, providing controls to navigate, zoom, and pan through the frames. This project is an experiment to create a live video editor.
 
