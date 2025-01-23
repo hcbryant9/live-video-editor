@@ -36,6 +36,8 @@ pip install opencv-python pillow
 python app.py
 ```
 
+note: it will take a while to launch depending on how large the file is since it converts the video to frames
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
