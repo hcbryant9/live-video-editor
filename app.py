@@ -101,11 +101,16 @@ class VideoFrameViewer:
         self.is_playing = False
 
     def display_frame(self, frame):
+        """Display a single frame on the canvas and handle resizing/zooming."""
         image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         image = Image.fromarray(image)
-        image = image.resize(
-            (int(image.width * self.zoom_factor), int(image.height * self.zoom_factor))
-        )
+
+        # Apply zoom factor to resize the frame
+        new_width = int(image.width * self.zoom_factor)
+        new_height = int(image.height * self.zoom_factor)
+        image = image.resize((new_width, new_height))
+
+        # Convert the image for Tkinter
         self.tk_image = ImageTk.PhotoImage(image)
 
         if not hasattr(self, "canvas_image"):
@@ -114,26 +119,29 @@ class VideoFrameViewer:
                 self.offset_x, self.offset_y, image=self.tk_image, anchor="nw"
             )
         else:
-            # Update the image content without deleting the canvas
+            # Update the image content and reposition it
             self.canvas.itemconfig(self.canvas_image, image=self.tk_image)
+            self.canvas.coords(self.canvas_image, self.offset_x, self.offset_y)
 
     def on_zoom(self, event):
+        """Zoom in or out based on mouse wheel or key events."""
         if event.delta > 0:
             self.zoom_factor *= 1.1  # Zoom in
         else:
             self.zoom_factor /= 1.1  # Zoom out
 
+        # Redraw the current frame with the new zoom factor
         if self.frames:
             self.display_frame(self.frames[self.current_frame_index])
 
     def zoom_in_key(self, event):
-        """Zoom in using the Up Arrow key."""
+        """Zoom in using a keyboard key."""
         self.zoom_factor *= 1.1
         if self.frames:
             self.display_frame(self.frames[self.current_frame_index])
 
     def zoom_out_key(self, event):
-        """Zoom out using the Down Arrow key."""
+        """Zoom out using a keyboard key."""
         self.zoom_factor /= 1.1
         if self.frames:
             self.display_frame(self.frames[self.current_frame_index])
