@@ -4,7 +4,7 @@ import cv2
 import os
 import random
 import threading
-
+from tqdm import tqdm
 
 class VideoFrameViewer:
     def __init__(self, root, video_path):
@@ -270,11 +270,21 @@ def load_video_frames(video_path):
     cap = cv2.VideoCapture(video_path)
     frames = []
     
-    while cap.isOpened():
-        ret, frame = cap.read()
-        if not ret:
-            break
-        frames.append(frame)
+    if not cap.isOpened():
+        print(f"Error: Could not open video file '{video_path}'")
+        return []
+
+    # Get total number of frames in the video
+    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    
+    # Initialize the progress bar with the total frame count
+    with tqdm(total=total_frames, desc="Converting video to frames", unit="frame") as pbar:
+        while cap.isOpened():
+            ret, frame = cap.read()
+            if not ret:
+                break
+            frames.append(frame)
+            pbar.update(1)  # Update progress bar after each frame
     
     cap.release()
     return frames
@@ -282,12 +292,12 @@ def load_video_frames(video_path):
 
 def release_frames(frames):
     for frame in frames:
-        del frame
+        frame.release()
 
 
 if __name__ == "__main__":
     root = tk.Tk()
-    video_path = os.path.join("assets", "your_video2.mov")
+    video_path = os.path.join("assets", "original.mov")
     if os.path.exists(video_path):
         viewer = VideoFrameViewer(root, video_path)
     else:
