@@ -5,11 +5,13 @@ import os
 import random
 import threading
 from tqdm import tqdm
+from datetime import datetime
 
 class VideoFrameViewer:
     def __init__(self, root, video_path):
         self.root = root
-        self.root.title("Video Frame Viewer")
+        self.root.title("video mixer")
+        root.config(bg="gray")
 
         # Load video
         self.frames = load_video_frames(video_path)
@@ -24,10 +26,11 @@ class VideoFrameViewer:
 
         # Set the canvas
         self.canvas = tk.Canvas(root, width=self.video_width, height=self.video_height, bg='black')
-        self.canvas.pack()
+        self.canvas.pack(pady=(20, 0))  
+       
 
         
-        self.nav_frame = tk.Frame(root)
+        self.nav_frame = tk.Frame(root, bg="gray")
         self.nav_frame.pack(pady=10)
 
         self.prev_button = tk.Button(self.nav_frame, text="Previous", command=self.prev_frame, repeatdelay=100, repeatinterval=50)
@@ -50,6 +53,9 @@ class VideoFrameViewer:
 
         self.reset_button = tk.Button(self.nav_frame, text="Reset", command=self.reset)
         self.reset_button.pack(side="left", padx=5)
+
+        self.save_button = tk.Button(self.nav_frame, text="Save Frame", command=self.save_frame)
+        self.save_button.pack(side="left", padx=5)
 
         self.current_frame_index = 0
         self.zoom_factor = 1.0
@@ -99,6 +105,27 @@ class VideoFrameViewer:
 
 
         self.is_playing = False
+
+
+
+    def save_frame(self):
+        """Save the current frame as a jpg file."""
+        if self.is_playing:
+            self.pause_video()  # Pause the video if it's playing
+
+        # Get the current frame and save it as a JPG file
+        frame = self.frames[self.current_frame_index]
+        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)  # Convert to RGB
+        image = Image.fromarray(frame_rgb)
+
+        # Create a file name with timestamp
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        save_path = f"saved_frame_{timestamp}.jpg"
+        
+        # Save the image as JPG
+        image.save(save_path)
+        print(f"Frame saved as {save_path}")
+
 
     def display_frame(self, frame):
         """Display a single frame on the canvas and handle resizing/zooming."""
@@ -297,7 +324,7 @@ def release_frames(frames):
 
 if __name__ == "__main__":
     root = tk.Tk()
-    video_path = os.path.join("assets", "original.mov")
+    video_path = os.path.join("assets", "1.mp4")
     if os.path.exists(video_path):
         viewer = VideoFrameViewer(root, video_path)
     else:
