@@ -101,7 +101,6 @@ class VideoFrameViewer:
         self.is_playing = False
 
     def display_frame(self, frame):
-     
         image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         image = Image.fromarray(image)
         image = image.resize(
@@ -109,9 +108,14 @@ class VideoFrameViewer:
         )
         self.tk_image = ImageTk.PhotoImage(image)
 
-        
-        self.canvas.delete("all")
-        self.canvas.create_image(self.offset_x, self.offset_y, image=self.tk_image, anchor="nw")
+        if not hasattr(self, "canvas_image"):
+            # Create the image once
+            self.canvas_image = self.canvas.create_image(
+                self.offset_x, self.offset_y, image=self.tk_image, anchor="nw"
+            )
+        else:
+            # Update the image content without deleting the canvas
+            self.canvas.itemconfig(self.canvas_image, image=self.tk_image)
 
     def on_zoom(self, event):
         if event.delta > 0:
@@ -164,6 +168,27 @@ class VideoFrameViewer:
             self.current_frame_index += 1
             self.display_frame(self.frames[self.current_frame_index])
 
+
+    def play_video(self):
+        """Play the video using root.after for smoother playback."""
+        if not self.is_playing:
+            self.is_playing = True
+            self.play_button.config(state="disabled") 
+            self.pause_button.config(state="normal")  
+            self._play_video()
+
+    def _play_video(self):
+        """Play the video frame-by-frame."""
+        if self.is_playing and self.current_frame_index < len(self.frames) - 1:
+            self.current_frame_index += 1
+            self.display_frame(self.frames[self.current_frame_index])
+            # Schedule the next frame display after 30ms
+            self.root.after(30, self._play_video)
+        else:
+            self.is_playing = False
+            self.play_button.config(state="normal")  
+            self.pause_button.config(state="disabled")
+
     def prev_frame_key(self, event):
         self.prev_frame()
 
@@ -174,23 +199,12 @@ class VideoFrameViewer:
         self.current_frame_index = random.randint(0, len(self.frames) - 1)
         self.display_frame(self.frames[self.current_frame_index])
 
-    def play_video(self):
-        if not self.is_playing:
-            self.is_playing = True
-            self.play_button.config(state="disabled") 
-            self.pause_button.config(state="normal")  
-            threading.Thread(target=self._play_video).start()
 
     def pause_video(self):
         self.is_playing = False
         self.play_button.config(state="normal")  
         self.pause_button.config(state="disabled")  
 
-    def _play_video(self):
-        while self.is_playing and self.current_frame_index < len(self.frames) - 1:
-            self.current_frame_index += 1
-            self.display_frame(self.frames[self.current_frame_index])
-            self.root.after(30)  
 
     def terminate(self):
         self.is_playing = False
