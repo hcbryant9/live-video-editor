@@ -331,3 +331,4 @@ if __name__ == "__main__":
         print(f"Error: Video file '{video_path}' not found in the assets folder.")
 
     root.mainloop()
+ 
