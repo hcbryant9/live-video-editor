@@ -21,6 +21,7 @@ class VideoMixerEditor:
         self.upload_buttons = []
         self.videos = [None, None, None, None]  # Store video frame sequences
         self.current_video_index = 0
+        self.current_frame_indexes = [0,0,0,0] # stores current position of each video
 
         for i in range(4):
             button = tk.Button(self.upload_frame, text=f"Upload Video {i + 1}", command=lambda idx=i: self.upload_video(idx), width=20, height=10)
@@ -280,10 +281,10 @@ class VideoMixerEditor:
         # release_frames(self.frames)  
 
     def reset_video(self):
-        self.is_playing = False
-        self.current_frame_index = 0
+        self.is_playing = True
+        # self.current_frame_index = 0
         if self.videos[self.current_video_index]:
-            self.display_frame(self.videos[self.current_video_index][self.current_frame_index])
+            self.display_frame(self.videos[self.current_video_index][self.current_frame_indexes[self.current_video_index]])
 
     def prev_frame(self):
         if self.current_frame_index > 0:
@@ -298,7 +299,7 @@ class VideoMixerEditor:
     def switch_video(self, index):
         if self.videos[index]:
             self.current_video_index = index
-            self.current_frame_index = 0
+            self.current_frame_indexes[index] = self.current_frame_index; 
             self.reset_video()
 
     def key_press(self, event):
